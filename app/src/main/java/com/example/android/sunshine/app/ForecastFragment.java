@@ -1,5 +1,6 @@
 package com.example.android.sunshine.app;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -8,6 +9,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -29,20 +31,29 @@ public class ForecastFragment extends Fragment
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_my, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         ListView listView = (ListView) rootView.findViewById(R.id.listview_forcast);
         mForecastAdapter = new ArrayAdapter<String>(
                 getActivity(),
                 R.layout.list_item_forcast,
                 R.id.list_item_forcast_textview);
         listView.setAdapter(mForecastAdapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                String forcast = mForecastAdapter.getItem(position);
+                Intent intent = new Intent(getActivity(),DetailActivity.class);
+                intent.putExtra(Intent.EXTRA_TEXT,forcast);
+                startActivity(intent);
+            }
+        });
         update();
         return rootView;
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.forcastfragment,menu);
+        inflater.inflate(R.menu.forecastfragment,menu);
     }
 
     @Override
