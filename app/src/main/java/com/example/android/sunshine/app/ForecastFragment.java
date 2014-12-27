@@ -1,7 +1,9 @@
 package com.example.android.sunshine.app;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -12,6 +14,8 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+
+import java.util.ArrayList;
 
 /**
  * Created by MKS on 25-12-2014.
@@ -36,7 +40,8 @@ public class ForecastFragment extends Fragment
         mForecastAdapter = new ArrayAdapter<String>(
                 getActivity(),
                 R.layout.list_item_forcast,
-                R.id.list_item_forcast_textview);
+                R.id.list_item_forcast_textview,
+                new ArrayList<String>());
         listView.setAdapter(mForecastAdapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -47,8 +52,13 @@ public class ForecastFragment extends Fragment
                 startActivity(intent);
             }
         });
-        update();
         return rootView;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        updateWeather();
     }
 
     @Override
@@ -60,13 +70,15 @@ public class ForecastFragment extends Fragment
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if(id == R.id.action_refresh){
-            update();
+            updateWeather();
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    public void update(){
-        new FetchWeatherTask(mForecastAdapter).execute("94043");
+    public void updateWeather(){
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String location = sharedPreferences.getString(getString(R.string.pref_location_key),getString(R.string.pref_location_default));
+        new FetchWeatherTask(mForecastAdapter).execute(location);
     }
 }

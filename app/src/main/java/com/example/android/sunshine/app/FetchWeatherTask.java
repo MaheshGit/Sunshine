@@ -80,7 +80,6 @@ public class FetchWeatherTask extends AsyncTask<String , Void ,String[]> {
                 return  null;
             }
             forecastJsonStr = buffer.toString();
-            Log.i(LOG_TAG," Forcast JSON String : "+forecastJsonStr);
         } catch (MalformedURLException e) {
             Log.e(LOG_TAG, "Error ", e);
         } catch (IOException e) {
