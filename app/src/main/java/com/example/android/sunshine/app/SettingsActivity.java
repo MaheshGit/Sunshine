@@ -17,6 +17,7 @@ public class SettingsActivity extends PreferenceActivity implements Preference.O
         addPreferencesFromResource(R.xml.pref_general);
         if(findPreference(getString(R.string.pref_location_key)) != null)
         bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_location_key)));
+        bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_temperature_units_key)));
     }
 
     private void bindPreferenceSummaryToValue(Preference preference) {

@@ -11,4 +11,11 @@
 
     </EditTextPreference>
 
+    <ListPreference
+        android:title="@string/pref_temperature_units_title"
+        android:key="@string/pref_temperature_units_key"
+        android:defaultValue="@string/pref_temperature_units_metric"
+        android:entries="@array/pref_units_options"
+        android:entryValues="@array/pref_units_values"/>
+
 </PreferenceScreen>

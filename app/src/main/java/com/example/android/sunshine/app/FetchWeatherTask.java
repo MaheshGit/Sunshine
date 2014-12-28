@@ -1,7 +1,10 @@
 package com.example.android.sunshine.app;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.ArrayAdapter;
 
@@ -22,13 +25,16 @@ import java.util.Date;
 /**
  * Created by MKS on 25-12-2014.
  */
-public class FetchWeatherTask extends AsyncTask<String , Void ,String[]> {
+public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
     private final String LOG_TAG = FetchWeatherTask.class.getSimpleName();
     private ArrayAdapter<String> mForecastAdapter;
+    private Context context;
 
-    public FetchWeatherTask(ArrayAdapter<String> mForecastAdapter){
+    public FetchWeatherTask(Context context, ArrayAdapter<String> mForecastAdapter) {
+        this.context = context;
         this.mForecastAdapter = mForecastAdapter;
     }
+
     @Override
     protected String[] doInBackground(String... params) {
         HttpURLConnection urlConnection = null;
@@ -38,8 +44,8 @@ public class FetchWeatherTask extends AsyncTask<String , Void ,String[]> {
         String units = "metric";
         int numDays = 7;
 
-        if(params.length == 0){
-            return  null;
+        if (params.length == 0) {
+            return null;
         }
         try {
             final String FORECAST_BASE_URL =
@@ -50,11 +56,11 @@ public class FetchWeatherTask extends AsyncTask<String , Void ,String[]> {
             final String DAYS_PARAM = "cnt";
 
             Uri builtUri = Uri.parse(FORECAST_BASE_URL).buildUpon()
-                              .appendQueryParameter(QUERY_PARAM , params[0])
-                              .appendQueryParameter(FORMAT_PARAM,format)
-                              .appendQueryParameter(UNITS_PARAM,units)
-                              .appendQueryParameter(DAYS_PARAM,Integer.toString(numDays))
-                              .build();
+                    .appendQueryParameter(QUERY_PARAM, params[0])
+                    .appendQueryParameter(FORMAT_PARAM, format)
+                    .appendQueryParameter(UNITS_PARAM, units)
+                    .appendQueryParameter(DAYS_PARAM, Integer.toString(numDays))
+                    .build();
 
             URL url = new URL(builtUri.toString());
             Log.v(LOG_TAG, "Built URI " + builtUri.toString());
@@ -67,29 +73,29 @@ public class FetchWeatherTask extends AsyncTask<String , Void ,String[]> {
             //Read the input stream into a String
             InputStream inputStream = urlConnection.getInputStream();
             StringBuffer buffer = new StringBuffer();
-            if (inputStream == null){
-                return  null;
+            if (inputStream == null) {
+                return null;
             }
 
             reader = new BufferedReader(new InputStreamReader(inputStream));
             String line;
-            while((line = reader.readLine())!= null){
+            while ((line = reader.readLine()) != null) {
                 buffer.append(line + "\n");
             }
-            if(buffer.length()==0){
-                return  null;
+            if (buffer.length() == 0) {
+                return null;
             }
             forecastJsonStr = buffer.toString();
         } catch (MalformedURLException e) {
             Log.e(LOG_TAG, "Error ", e);
         } catch (IOException e) {
             Log.e(LOG_TAG, "Error ", e);
-        }finally {
-            if(urlConnection != null){
+        } finally {
+            if (urlConnection != null) {
                 urlConnection.disconnect();
             }
 
-            if(reader != null){
+            if (reader != null) {
                 try {
                     reader.close();
                 } catch (IOException e) {
@@ -98,7 +104,7 @@ public class FetchWeatherTask extends AsyncTask<String , Void ,String[]> {
             }
         }
         try {
-            return getWeatherDataFromJson(forecastJsonStr,numDays);
+            return getWeatherDataFromJson(forecastJsonStr, numDays);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -108,15 +114,15 @@ public class FetchWeatherTask extends AsyncTask<String , Void ,String[]> {
     @Override
     protected void onPostExecute(String[] strings) {
         super.onPostExecute(strings);
-        if(strings!= null){
+        if (strings != null) {
             mForecastAdapter.clear();
-            for(String dayForecatdata : strings){
+            for (String dayForecatdata : strings) {
                 mForecastAdapter.add(dayForecatdata);
             }
         }
     }
 
-    private String getReadableDateString(long time){
+    private String getReadableDateString(long time) {
 // Because the API returns a unix timestamp (measured in seconds),
 // it must be converted to milliseconds in order to be converted to valid date.
         Date date = new Date(time * 1000);
@@ -125,7 +131,15 @@ public class FetchWeatherTask extends AsyncTask<String , Void ,String[]> {
     }
 
     private String formatHighLows(double high, double low) {
-// For presentation, assume the user doesn't care about tenths of a degree.
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String unitsType = sharedPreferences.getString(context.getString(R.string.pref_temperature_units_key),
+                context.getString(R.string.pref_temperature_units_metric));
+        if(unitsType.equals(context.getString(R.string.pref_temperature_units_imperial))){
+            high = (high * 1.8) + 32;
+            low = (low * 1.8) + 32;
+        }else if(!unitsType.equals(context.getString(R.string.pref_temperature_units_metric))){
+            Log.d(LOG_TAG, "Unit type not found: " + unitsType);
+        }
         long roundedHigh = Math.round(high);
         long roundedLow = Math.round(low);
 
@@ -149,7 +163,7 @@ public class FetchWeatherTask extends AsyncTask<String , Void ,String[]> {
         JSONArray weatherArray = forecastJson.getJSONArray(OWM_LIST);
 
         String[] resultStrs = new String[numDays];
-        for(int i = 0; i < weatherArray.length(); i++) {
+        for (int i = 0; i < weatherArray.length(); i++) {
 // For now, using the format "Day, description, hi/low"
             String day;
             String description;
