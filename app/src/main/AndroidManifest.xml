@@ -24,7 +24,7 @@
             android:parentActivityName=".MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.android.sunshine.app.MyActivity" />
+                android:value="com.example.android.sunshine.app.MainActivity" />
         </activity>
 
         <activity
@@ -35,6 +35,10 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.android.sunshine.app.MainActivity" />
         </activity>
+
+        <provider
+            android:authorities="com.example.android.sunshine.app"
+            android:name="data.WeatherProvider"/>
     </application>
 
 </manifest>
